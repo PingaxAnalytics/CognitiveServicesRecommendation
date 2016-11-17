@@ -46,8 +46,9 @@ def printUploadSummary(UploadLog):
 
 def main():
     AccountKey='ee989fd9d9c24957bfd47022c982b0bc'   #Enter your API key here.  
-    modelId = None #'f201626f-da7c-49d6-bed9-88e71351f397' #1587762
-
+    # modelId = 'f201626f-da7c-49d6-bed9-88e71351f397' #1587762
+    # modelId = 'df107628-fdd4-43bd-a367-dec255ec9943' #1587767    
+    modelId =None
 
     recommender=Azrecommender.RecommendationAPIWrapper(AccountKey)
 
@@ -92,7 +93,6 @@ def main():
 
 
         buildId = recommender.BuildModel(modelId,params)        
-        print "buildId is ", buildId
         # {"buildId":1587719}        
 
         status= recommender.WaitForBuildCompletion(buildId)
@@ -105,9 +105,8 @@ def main():
         
 
         recommender.SetActiveBuild(modelId,buildId)
-
+        
         #Get item to item recommendations. (I2I)
-
         print "\nGetting Item to Item Recommendations for The Piano Man's Daughter"
         itemids = '6485200'
         resjson =recommender.GetRecomendations(modelId,buildId,itemids,'6')
