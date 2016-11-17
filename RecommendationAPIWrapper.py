@@ -51,8 +51,9 @@ class RecommendationAPIWrapper:
 
     def CreateModel(self,modelName,modelDescription):
         try:
-            data = { "modelName": modelName,  "description": modelDescription}
-            r=requests.post(self.baseModelURL,json=data ,  headers=self.headers)
+            # import pdb; pdb.set_trace();
+            data = { "modelName": modelName, "description": modelDescription}
+            r=requests.post(self.baseModelURL, data=json.dumps(data), headers=self.headers)
             r.raise_for_status()
             jsonresponse = json.loads(r.text)
             return jsonresponse['id']        
@@ -76,7 +77,7 @@ class RecommendationAPIWrapper:
             print str(e)
             
     def UploadCatalog(self,modelId, CatalogFile, DisplayName):
-        url=self.baseModelURL+'/'+modelId+'/catalog?catalogDisplayName=' +DisplayName
+        url=self.baseModelURL+'/'+str(modelId)+'/catalog?catalogDisplayName=' +DisplayName
         try:
             with open(CatalogFile,'rb') as f:
                 r= requests.post(url,data=f.read(),headers=self.headers)
@@ -99,7 +100,9 @@ class RecommendationAPIWrapper:
     def BuildModel(self,modelId,params):
         url=self.baseModelURL+'/'+modelId+'/builds' 
         try:
-            r= requests.post(url,json=params,headers=self.headers)
+            print params
+            r= requests.post(url,data=json.dumps(params),headers=self.headers)
+            print r.text
             r.raise_for_status()
             jsonresponse = json.loads(r.text)
            
@@ -110,7 +113,7 @@ class RecommendationAPIWrapper:
     def WaitForBuildCompletion(self,buildId):
         url = self.operationsBaseURL +'/'+str(buildId)
         status = None
-        print "WaitForBuildCompletion"
+        # print "WaitForBuildCompletion"
         while True:
             r=requests.get(url,  headers=self.headers)
             r.raise_for_status()
@@ -125,7 +128,7 @@ class RecommendationAPIWrapper:
         url=self.baseModelURL+'/'+modelId
         data = { "ActiveBuildId": buildId}
         try:
-            r= requests.patch(url,json=data,headers=self.headers)
+            r= requests.patch(url,data=json.dumps(data),headers=self.headers)
             r.raise_for_status()
             #jsonresponse = json.loads(r.text)
            
@@ -136,6 +139,7 @@ class RecommendationAPIWrapper:
     def GetRecomendations(self,modelId,buildId,itemIds,numberOfResults):
         url=self.baseModelURL+'/'+modelId +'/recommend/item?itemIds='+itemIds+'&numberOfResults='+numberOfResults+'&minimalScore=0'
         try:
+           # print url
            r=requests.get(url,  headers=self.headers)
            r.raise_for_status()
            return json.loads(r.text)

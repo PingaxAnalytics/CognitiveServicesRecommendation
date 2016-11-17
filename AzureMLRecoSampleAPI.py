@@ -30,7 +30,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """
 
 import RecommendationAPIWrapper as Azrecommender
-import time
+import time, json
 
 
 def printRecommendations(recommendationItems):
@@ -45,13 +45,21 @@ def printUploadSummary(UploadLog):
     
 
 def main():
-    AccountKey=''   #Enter your API key here.  
-    modelId = None
+    AccountKey='ee989fd9d9c24957bfd47022c982b0bc'   #Enter your API key here.  
+    modelId = None #'f201626f-da7c-49d6-bed9-88e71351f397' #1587762
+
+
     recommender=Azrecommender.RecommendationAPIWrapper(AccountKey)
+
+    # print recommender
     try:
+
         #Create the Model
-        modelId=recommender.CreateModel('MyModel','Sample model')
+        modelId=recommender.CreateModel('Pingax','Recommendations')
         print 'Created Model id :  %s' % modelId
+
+        
+        # import pdb; pdb.set_trace();
         # Load Catalog
         print '\nUpload Feature Catalog'        
         importCatalogStats=recommender.UploadCatalog(modelId,'data/catalog_small.csv','catalog_small.csv')
@@ -61,6 +69,7 @@ def main():
         importUsageStats= recommender.UploadUsage(modelId,'data/usage_small.csv','usage_small.csv')
         
         printUploadSummary(importUsageStats)
+
         print '\nBuild Model'
         # Model Parameter information can be found at
         # https://westus.dev.cognitive.microsoft.com/docs/services/Recommendations.V4.0/operations/56f30d77eda5650db055a3d0/console
@@ -80,8 +89,12 @@ def main():
               }
         }
         
+
+
         buildId = recommender.BuildModel(modelId,params)        
-        
+        print "buildId is ", buildId
+        # {"buildId":1587719}        
+
         status= recommender.WaitForBuildCompletion(buildId)
         if status != 'Succeeded':
             print 'Build %d did not end successfully, the sample app will stop here' %buildId
@@ -89,9 +102,12 @@ def main():
        
         print 'Waiting for 40 sec for propagation of the built model...'
         time.sleep(40) # Wait 40 seconds
-        recommender.SetActiveBuild(modelId,buildId)
         
+
+        recommender.SetActiveBuild(modelId,buildId)
+
         #Get item to item recommendations. (I2I)
+
         print "\nGetting Item to Item Recommendations for The Piano Man's Daughter"
         itemids = '6485200'
         resjson =recommender.GetRecomendations(modelId,buildId,itemids,'6')
@@ -101,19 +117,17 @@ def main():
         userId = "142256"
         
         print '\nGetting User Recommendations for User: 142256'
-        resjson =recommender.GetUserRecommendations(modelId,buildId,userId,'6')
+        resjson =recommender.GetUserRecommendations(modelId,buildId,userId,'16')
         
         printRecommendations(resjson)
+
     finally:
-        if modelId != None:
+        print 'Done' 
+        # if modelId != None:
              # Uncomment the line below if you wish to delete the model.
              # Note that you can have up to 10 models at any time. 
              # You may have up to 20 builds per model.            
-            recommender.DeleteModel(modelId)                        
-    
-            
-
-
+             # recommender.DeleteModel(modelId)                        
 
 res = main()
 
